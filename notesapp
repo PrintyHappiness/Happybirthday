@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Application</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f3f5;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background-color: #f9f9f9;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .note-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .note-list li {
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .note-list li:hover {
+            background-color: #e8e8e8;
+        }
+
+        .note-list li.active {
+            background-color: #d0e3ff;
+        }
+
+        .note-list li p {
+            margin: 0;
+            color: #444;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+        }
+
+        .delete-button {
+            background: #cd853f;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .delete-button:hover {
+            background-color: #a0522d;
+        }
+
+        .main-content {
+            margin-left: 320px;
+            padding: 20px;
+            padding-top: 80px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .main-content h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        #noteInput {
+            width: calc(100% - 20px);
+            height: 100px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        button {
+            width: calc(100% - 20px);
+            padding: 12px;
+            background-color: #ffefdb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #cd853f;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Notes</h2>
+        <ul class="note-list" id="notesContainer"></ul>
+    </div>
+    <div class="main-content">
+        <h1>Note</h1>
+        <textarea id="noteInput" placeholder="Write a note..."></textarea>
+        <button id="saveButton">Save</button>
+    </div>
+
+    <script>
+        let editIndex = -1; // Track the index of the note being edited
+
+        function loadNotes() {
+            const notesContainer = document.getElementById('notesContainer');
+            notesContainer.innerHTML = '';
+
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+            notes.forEach((note, index) => {
+                const noteElement = document.createElement('li');
+                noteElement.classList.add('note');
+
+                const noteText = document.createElement('p');
+                noteText.textContent = note;
+                noteElement.appendChild(noteText);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '×';
+                deleteButton.classList.add('delete-button');
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    deleteNote(index);
+                });
+                noteElement.appendChild(deleteButton);
+
+                noteElement.addEventListener('click', () => {
+                    document.getElementById('noteInput').value = note;
+                    document.querySelectorAll('.note-list li').forEach(el => el.classList.remove('active'));
+                    noteElement.classList.add('active');
+                    document.querySelectorAll('.delete-button').forEach(btn => btn.style.display = 'none');
+                    deleteButton.style.display = 'flex';
+                    editIndex = index; // Set the index of the note being edited
+                });
+
+                notesContainer.appendChild(noteElement);
+            });
+        }
+
+        function saveNote() {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value;
+
+            if (noteText.trim() !== '') {
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                
+                if (editIndex === -1) {
+                    // Add a new note
+                    notes.push(noteText);
+                } else {
+                    // Update the existing note
+                    notes[editIndex] = noteText;
+                    editIndex = -1; // Reset the edit index
+                }
+
+                localStorage.setItem('notes', JSON.stringify(notes));
+                noteInput.value = '';
+                loadNotes();
+            }
+        }
+
+        function deleteNote(index) {
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+        }
+
+        window.addEventListener('DOMContentLoaded', loadNotes);
+
+        document.getElementById('saveButton').addEventListener('click', saveNote);
+
+        document.getElementById('noteInput').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                saveNote();
+            }
+        });
+    </script>
+</body>
+</html>
