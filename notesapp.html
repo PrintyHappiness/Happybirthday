@@ -208,11 +208,13 @@
         }
 
         function deleteNote(index) {
-            const notes = JSON.parse(localStorage.getItem('notes')) || [];
-            notes.splice(index, 1);
-            localStorage.setItem('notes', JSON.stringify(notes));
-            loadNotes();
-        }
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.splice(index, 1);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+    document.getElementById('noteInput').value = ''; // Clear the note input
+    editIndex = -1; // Reset the edit index
+}
 
         window.addEventListener('DOMContentLoaded', loadNotes);
 
