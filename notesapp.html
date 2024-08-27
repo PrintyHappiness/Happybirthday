@@ -208,13 +208,13 @@
         }
 
         function deleteNote(index) {
-    const notes = JSON.parse(localStorage.getItem('notes')) || [];
-    notes.splice(index, 1);
-    localStorage.setItem('notes', JSON.stringify(notes));
-    loadNotes();
-    document.getElementById('noteInput').value = ''; // Clear the note input
-    editIndex = -1; // Reset the edit index
-}
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+            document.getElementById('noteInput').value = ''; // Clear the note input
+            editIndex = -1; // Reset the edit index
+        }
 
         window.addEventListener('DOMContentLoaded', loadNotes);
 
@@ -222,8 +222,8 @@
 
         document.getElementById('noteInput').addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                saveNote();
+                event.preventDefault(); // Prevents the default action of the Enter key
+                // Do not call saveNote here to prevent saving on Enter key
             }
         });
     </script>
